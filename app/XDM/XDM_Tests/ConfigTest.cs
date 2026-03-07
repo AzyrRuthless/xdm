@@ -3,7 +3,8 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using XDM.Core.Lib.Common;
+using XDM.Core;
+using XDM.Core.Downloader;
 
 namespace XDM.SystemTests
 {

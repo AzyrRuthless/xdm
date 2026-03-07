@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using XDM.Core.Lib.Common;
-using XDM.Core.Lib.Common.Collections;
+using XDM.Core;
+using XDM.Core.Downloader;
+using XDM.Core.Collections;
 
 namespace XDM.SystemTests
 {

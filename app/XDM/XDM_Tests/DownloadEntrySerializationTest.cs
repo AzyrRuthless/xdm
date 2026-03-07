@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using XDM.Core.Lib.Common;
-using XDM.Core.Lib.Downloader;
+using XDM.Core;
+using XDM.Core.Downloader;
+using XDM.Core.Downloader;
 
 namespace XDM.SystemTests
 {
     public class DownloadEntrySerializationTest
     {
         [Test]
-        public void TestSerializeDeserializeFinishedDownloadEntryOk()
+        public void TestSerializeDeserializeFinishedDownloadItemOk()
         {
             var file = Guid.NewGuid().ToString();
             var folder = Path.GetTempPath();
-            var list = new List<FinishedDownloadEntry>();
-            list.Add(new FinishedDownloadEntry
+            var list = new List<FinishedDownloadItem>();
+            list.Add(new FinishedDownloadItem
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Sample entry 1",
@@ -25,7 +26,7 @@ namespace XDM.SystemTests
                 FileNameFetchMode = FileNameFetchMode.FileNameAndExtension,
                 Size = 12345
             });
-            list.Add(new FinishedDownloadEntry
+            list.Add(new FinishedDownloadItem
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Sample entry 2",
@@ -34,17 +35,17 @@ namespace XDM.SystemTests
                 FileNameFetchMode = FileNameFetchMode.FileNameAndExtension,
                 Size = 1234567
             });
-            TransactedIO.WriteFinishedList(list, file, folder);
-            Console.WriteLine(JsonConvert.SerializeObject(TransactedIO.ReadFinishedList(file, folder), Formatting.Indented));
+            XDM.Core.IO.TransactedIO.Write(JsonConvert.SerializeObject(list), file, folder);
+            Console.WriteLine(JsonConvert.SerializeObject(XDM.Core.IO.TransactedIO.Read(file, folder), Formatting.Indented));
         }
 
         [Test]
-        public void TestSerializeDeserializeInProgressDownloadEntryOk()
+        public void TestSerializeDeserializeInProgressDownloadItemOk()
         {
             var file = Guid.NewGuid().ToString();
             var folder = Path.GetTempPath();
-            var list = new List<InProgressDownloadEntry>();
-            list.Add(new InProgressDownloadEntry
+            var list = new List<InProgressDownloadItem>();
+            list.Add(new InProgressDownloadItem
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Sample entry 1",
@@ -55,7 +56,7 @@ namespace XDM.SystemTests
                 Progress=10,
                 TargetDir="abc"
             });
-            list.Add(new InProgressDownloadEntry
+            list.Add(new InProgressDownloadItem
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Sample entry 2",
@@ -66,8 +67,8 @@ namespace XDM.SystemTests
                 Progress = 20,
                 TargetDir = "abcd"
             });
-            TransactedIO.WriteInProgressList(list, file, folder);
-            Console.WriteLine(JsonConvert.SerializeObject(TransactedIO.ReadInProgressList(file, folder), Formatting.Indented));
+            XDM.Core.IO.TransactedIO.Write(JsonConvert.SerializeObject(list), file, folder);
+            Console.WriteLine(JsonConvert.SerializeObject(XDM.Core.IO.TransactedIO.Read(file, folder), Formatting.Indented));
         }
     }
 }

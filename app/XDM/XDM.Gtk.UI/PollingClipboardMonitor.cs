@@ -34,13 +34,15 @@ namespace XDM.GtkUI
                 Log.Debug("Clipboard is null");
                 return;
             }
-            var text = cb.WaitForText();
-            if (text != lastText)
+            cb.RequestText(new ClipboardTextReceivedFunc((clipboard, text) =>
             {
-                Log.Debug("Clipboard changed");
-                lastText = text;
-                this.ClipboardChanged?.Invoke(this, EventArgs.Empty);
-            }
+                if (text != lastText)
+                {
+                    Log.Debug("Clipboard changed");
+                    lastText = text;
+                    this.ClipboardChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }));
         }
 
         public event EventHandler? ClipboardChanged;

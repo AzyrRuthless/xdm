@@ -33,7 +33,7 @@ namespace XDM.Core.Updater
             try
             {
                 Log.Debug("Checking for updates...");
-                if (UpdateChecker.GetAppUpdates(ApplicationContext.CoreService.AppVerion, out IList<UpdateInfo> upd, out bool firstUpdate))
+                if (UpdateChecker.GetAppUpdates(ApplicationContext.CoreService.AppVerion, out IList<UpdateInfo> upd, out bool firstUpdate, UpdateMode.YoutubeDLUpdateOnly))
                 {
                     Updates = upd;
                     if (upd != null && upd.Count > 0)

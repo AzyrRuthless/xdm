@@ -56,20 +56,20 @@ namespace XDM.Core.MediaProcessor
 
         private static string[] CreateMergeArgs(string file1, string file2, string outfile)
         {
-            var args = new string[] { "-i", file1, "-i", file2, "-acodec", "copy", "-vcodec", "copy",
-                "-map", "0", "-map", "1", outfile, "-y" };
+            var args = new string[] { "-i", file1, "-i", file2, "-c", "copy",
+                "-map", "0:v:0", "-map", "1:a:0?", "-map", "0:a:0?", "-map", "1:v:0?", outfile, "-y" };
             return args;
         }
 
         private string[] CreateHLSMergeArgs(string file, string outfile)
         {
-            var args = new string[] { "-f", "concat", "-safe", "0", "-i", file, "-auto_convert", "1", "-acodec", "copy", "-vcodec", "copy", outfile, "-y" };
+            var args = new string[] { "-f", "concat", "-safe", "0", "-i", file, "-auto_convert", "1", "-c", "copy", outfile, "-y" };
             return args;
         }
 
         private string[] CreateMP3MergeArgs(string file, string outfile)
         {
-            var args = new string[] { "-i", file, "-acodec", "libmp3lame", outfile, "-y" };
+            var args = new string[] { "-i", file, "-c:a", "libmp3lame", outfile, "-y" };
             return args;
         }
 

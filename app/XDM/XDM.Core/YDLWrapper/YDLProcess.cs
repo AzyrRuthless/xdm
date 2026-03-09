@@ -121,19 +121,14 @@ namespace YDLWrapper
 
         private static YtBinaryType GetYtBinaryType(string executableName)
         {
-            if (executableName.StartsWith("yt-dlp"))
-            {
-                return YtBinaryType.YtDlp;
-            }
-            return YtBinaryType.Yt;
+            return YtBinaryType.YtDlp;
         }
 
         public static YtBinary FindYDLBinary()
         {
-            //var executableName = Environment.OSVersion.Platform == PlatformID.Win32NT ? "youtube-dl.exe" : "youtube-dl";
             var executableNames = Environment.OSVersion.Platform == PlatformID.Win32NT
-                ? new string[] { "yt-dlp_x86.exe", "youtube-dl.exe" }
-                : new string[] { "yt-dlp", "yt-dlp_linux", "youtube-dl" };
+                ? new string[] { "yt-dlp_x86.exe", "yt-dlp.exe" }
+                : new string[] { "yt-dlp", "yt-dlp_linux" };
             string? binPath = null;
             string? execName = null;
             var found = false;

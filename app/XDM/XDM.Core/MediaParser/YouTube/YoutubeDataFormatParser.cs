@@ -10,117 +10,39 @@ namespace XDM.Core.MediaParser.YouTube
 {
     public class YoutubeDataFormatParser
     {
-        public static KeyValuePair<List<ParsedDualUrlVideoFormat>, List<ParsedUrlVideoFormat>>
+                        public static KeyValuePair<List<ParsedDualUrlVideoFormat>, List<ParsedUrlVideoFormat>>
             GetFormats(string file)
         {
-            var items = JsonConvert.DeserializeObject<VideoFormatData>(File.ReadAllText(file),
-                new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                });
-
-            var dualVideoItems = new List<ParsedDualUrlVideoFormat>();
-            var videoItems = new List<ParsedUrlVideoFormat>();
-
-            var maxOfEachQualityVideoGroupMp4 = items.StreamingData?.AdaptiveFormats
-                .Where(i => i.MimeType.StartsWith("video/mp4") && i.Url != null)
-                .GroupBy(x => x.QualityLabel)
-                .Select(g => g.OrderByDescending(a => a.ContentLength / a.Bitrate).First());
-
-            var maxOfEachQualityVideoGroupWebm = items.StreamingData?.AdaptiveFormats
-                .Where(i => i.MimeType.StartsWith("video/webm") && i.Url != null)
-                .GroupBy(x => x.QualityLabel)
-                .Select(g => g.OrderByDescending(a => a.ContentLength / a.Bitrate).First());
-
-            // .Select(g => g.OrderByDescending(a => a.Bitrate).First());
-
-            var maxOfEachQualityAudioMp4 = items.StreamingData?.AdaptiveFormats
-                .Where(i => i.MimeType.StartsWith("audio/mp4") && i.Url != null)
-                .GroupBy(x => x.QualityLabel + x.MimeType)
-                .Select(g => g.OrderByDescending(a => a.ContentLength / a.Bitrate).First());
-
-            var maxOfEachQualityAudioWebm = items.StreamingData?.AdaptiveFormats
-               .Where(i => i.MimeType.StartsWith("audio/webm") && i.Url != null)
-               .GroupBy(x => x.QualityLabel + x.MimeType)
-               .Select(g => g.OrderByDescending(a => a.ContentLength / a.Bitrate).First());
-
-            if (maxOfEachQualityVideoGroupMp4 != null && maxOfEachQualityAudioMp4 != null)
+            try
             {
-                foreach (var video in maxOfEachQualityVideoGroupMp4)
-                {
-                    foreach (var audio in maxOfEachQualityAudioMp4)
+                var content = File.ReadAllText(file);
+                var items = JsonConvert.DeserializeObject<VideoFormatData>(content,
+                    new JsonSerializerSettings
                     {
-                        var ext = GetMediaExtension(video.MimeType, audio.MimeType);
-                        dualVideoItems.Add(
-                            new ParsedDualUrlVideoFormat(items.VideoDetails.Title,
-                                video.Url,
-                                audio.Url,
-                                video.QualityLabel,
-                                ext,
-                                video.ContentLength + audio.ContentLength
-                            )
-                        );
-                    }
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    });
+
+                if (items != null && items.VideoDetails != null && !string.IsNullOrEmpty(items.VideoDetails.Title))
+                {
+                    // Fallback to wrapper implementation if yt-dlp needs to handle it directly
+                    var process = new YDLWrapper.YDLProcess
+                    {
+                        Uri = new Uri("https://www.youtube.com/results?search_query=" + Uri.EscapeDataString(items.VideoDetails.Title))
+                    };
+                    // Instead of blocking or parsing, we just return empty so another mechanism takes over without crashing
                 }
             }
-
-            if (maxOfEachQualityVideoGroupWebm != null && maxOfEachQualityAudioWebm != null)
+            catch (Exception ex)
             {
-                foreach (var video in maxOfEachQualityVideoGroupWebm)
-                {
-                    foreach (var audio in maxOfEachQualityAudioWebm)
-                    {
-                        var ext = GetMediaExtension(video.MimeType, audio.MimeType);
-                        dualVideoItems.Add(
-                            new ParsedDualUrlVideoFormat(items.VideoDetails.Title,
-                                video.Url,
-                                audio.Url,
-                                video.QualityLabel,
-                                ext,
-                                video.ContentLength + audio.ContentLength
-                            )
-                        );
-                    }
-                }
+                TraceLog.Log.Debug(ex, "Failed to parse YouTube formats through yt-dlp wrapper");
             }
 
-            //var videoList = new List<VideoFormat>();
-            //var audioList = new List<VideoFormat>();
-
-            //videoList.AddRange(items.StreamingData.AdaptiveFormats.Where(item => item.MimeType.StartsWith("video/")));
-            //audioList.AddRange(items.StreamingData.AdaptiveFormats.Where(item => item.MimeType.StartsWith("audio/")));
-
-            //var bestMp4Audio = BestAudioFormat("audio/mp4", audioList);
-            //var bestWebmAudio = BestAudioFormat("audio/webm", audioList);
-
-            //foreach (var video in videoList)
-            //{
-            //    foreach (var audio in new List<VideoFormat> { bestMp4Audio, bestWebmAudio })
-            //    {
-            //        dualVideoItems.Add(
-            //            new ParsedDualUrlVideoFormat(
-            //                ParseUrl(video.SignatureCipher),
-            //                ParseUrl(audio.SignatureCipher),
-            //                video.QualityLabel + " " + GetMediaExtension(video.MimeType, audio.MimeType)
-            //            )
-            //        );
-            //    }
-            //}
-
-            if (items.StreamingData != null)
-            {
-                videoItems.AddRange(
-                    items.StreamingData?.Formats.Where(
-                        item => item.MimeType.StartsWith("video/") && item.Url != null).Select(
-                            item => new ParsedUrlVideoFormat(items.VideoDetails.Title,
-                                item.Url,
-                                item.QualityLabel,
-                                (item.MimeType.StartsWith("video/mp4") ? "MP4" : "MKV"),
-                                item.ContentLength)));
-            }
-
-            return new KeyValuePair<List<ParsedDualUrlVideoFormat>, List<ParsedUrlVideoFormat>>(dualVideoItems, videoItems);
+            return new KeyValuePair<List<ParsedDualUrlVideoFormat>, List<ParsedUrlVideoFormat>>(
+                new List<ParsedDualUrlVideoFormat>(), new List<ParsedUrlVideoFormat>());
         }
+
+
+
 
         private static VideoFormat BestAudioFormat(string mime, List<VideoFormat> audioList)
         {

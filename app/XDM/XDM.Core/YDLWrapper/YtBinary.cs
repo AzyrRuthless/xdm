@@ -12,6 +12,6 @@ namespace YDLWrapper
 
     public enum YtBinaryType
     {
-        YtDlp, Yt
+        YtDlp
     }
 }

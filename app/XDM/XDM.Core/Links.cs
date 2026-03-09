@@ -17,7 +17,7 @@ namespace XDM.Core
         public const string VideoDownloadTutorialUrl = "https://subhra74.github.io/xdm/redirect.html?target=video";
         public const string HomePageUrl = "https://xtremedownloadmanager.com/";
         public const string YtDlpReleaseGH = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest";
-        public const string FFmpegCustomReleaseGH = "https://api.github.com/repos/subhra74/xdm-ffmpeg-update/releases/latest";
+        public const string FFmpegCustomReleaseGH = "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest";
         public const string AppLatestReleaseGH = "https://api.github.com/repos/subhra74/xdm/releases/latest";
         public const string AppUpdateCheckerUrl = "https://subhra74.github.io/xdm/update-checker.html";
         public const string HelperToolsUrl = "https://subhra74.github.io/xdm/redirect.html?target=helpers";

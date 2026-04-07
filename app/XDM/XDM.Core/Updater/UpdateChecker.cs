@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,11 +23,13 @@ namespace XDM.Core.Updater
             updates = new List<UpdateInfo>();
 
             var lastYoutubeDLUpdate = DateTime.MaxValue;
+            var lastFFmpegUpdate = DateTime.MaxValue;
 
             if (updateMode != UpdateMode.All)
             {
                 //this is being called for missing ytdlp/ffmpeg components, not the update which run at app startup
                 lastYoutubeDLUpdate = DateTime.MinValue;
+                lastFFmpegUpdate = DateTime.MinValue;
             }
 
             firstUpdate = true;
@@ -39,6 +41,7 @@ namespace XDM.Core.Updater
                 {
                     var hist = JsonConvert.DeserializeObject<UpdateHistory>(File.ReadAllText(updateHistoryFile));
                     lastYoutubeDLUpdate = hist.YoutubeDLUpdateDate;
+                    lastFFmpegUpdate = hist.FFmpegUpdateDate;
                     firstUpdate = false;
                 }
 
@@ -65,14 +68,14 @@ namespace XDM.Core.Updater
                     }
                 }
 
-                //if ((updateMode & UpdateMode.FFmpegUpdateOnly) == UpdateMode.FFmpegUpdateOnly)
-                //{
-                //    var ffmpegUpdate = FindNewFFmpegVersion(hc, lastFFmpegUpdate);
-                //    if (ffmpegUpdate != null)
-                //    {
-                //        updates.Add(ffmpegUpdate.Value);
-                //    }
-                //}
+                if ((updateMode & UpdateMode.FFmpegUpdateOnly) == UpdateMode.FFmpegUpdateOnly)
+                {
+                    var ffmpegUpdate = FindNewFFmpegVersion(hc, lastFFmpegUpdate);
+                    if (ffmpegUpdate != null)
+                    {
+                        updates.Add(ffmpegUpdate.Value);
+                    }
+                }
 
                 return true;
             }
@@ -169,17 +172,17 @@ namespace XDM.Core.Updater
                 Extensions = new string[] { }
             };
 
-        ////TODO: Handle MacOS
-        //private static AssetPattern GetFFmpegExecutableNameForCurrentOS() =>
-        //    Environment.OSVersion.Platform == PlatformID.Win32NT ? new AssetPattern
-        //    {
-        //        Prefix = "ffmpeg-x86",
-        //        Extensions = new string[] { ".exe" }
-        //    } : new AssetPattern
-        //    {
-        //        Prefix = "ffmpeg",
-        //        Extensions = new string[] { }
-        //    };
+        //TODO: Handle MacOS
+        private static AssetPattern GetFFmpegExecutableNameForCurrentOS() =>
+            Environment.OSVersion.Platform == PlatformID.Win32NT ? new AssetPattern
+            {
+                Prefix = "ffmpeg-master-latest-win64-gpl",
+                Extensions = new string[] { ".zip" }
+            } : new AssetPattern
+            {
+                Prefix = "ffmpeg-master-latest-linux64-gpl",
+                Extensions = new string[] { ".tar.xz" }
+            };
 
         //TODO: Handle Linux and Mac
         private static AssetPattern? GetAppInstallerNameForCurrentOS()
@@ -206,9 +209,9 @@ namespace XDM.Core.Updater
             FindNewRelease(hc, Links.YtDlpReleaseGH, r => r.PublishedAt > lastUpdated,
                 GetYoutubeDLExecutableNameForCurrentOS());
 
-        //private static UpdateInfo? FindNewFFmpegVersion(IHttpClient hc, DateTime lastUpdated) =>
-        //    FindNewRelease(hc, Links.FFmpegCustomReleaseGH, r => r.PublishedAt > lastUpdated,
-        //        GetFFmpegExecutableNameForCurrentOS());
+        private static UpdateInfo? FindNewFFmpegVersion(IHttpClient hc, DateTime lastUpdated) =>
+            FindNewRelease(hc, Links.FFmpegCustomReleaseGH, r => r.PublishedAt > lastUpdated,
+                GetFFmpegExecutableNameForCurrentOS());
 
         private static UpdateInfo? FindNewAppVersion(IHttpClient hc, Version appVersion) =>
             FindNewRelease(hc, Links.AppLatestReleaseGH, r => ParseGitHubTag(r.TagName) > appVersion,
@@ -247,6 +250,7 @@ namespace XDM.Core.Updater
     public struct UpdateHistory
     {
         public DateTime YoutubeDLUpdateDate { get; set; }
+        public DateTime FFmpegUpdateDate { get; set; }
     }
 
     public struct AssetPattern
@@ -259,9 +263,8 @@ namespace XDM.Core.Updater
     public enum UpdateMode
     {
         AppUpdateOnly = 4,
-        //FFmpegUpdateOnly = 1,
+        FFmpegUpdateOnly = 1,
         YoutubeDLUpdateOnly = 2,
-        All = AppUpdateOnly /*| FFmpegUpdateOnly*/ | YoutubeDLUpdateOnly
+        All = AppUpdateOnly | FFmpegUpdateOnly | YoutubeDLUpdateOnly
     }
 }
-

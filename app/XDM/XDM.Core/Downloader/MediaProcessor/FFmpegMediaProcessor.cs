@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,7 +57,7 @@ namespace XDM.Core.MediaProcessor
         private static string[] CreateMergeArgs(string file1, string file2, string outfile)
         {
             var args = new string[] { "-i", file1, "-i", file2, "-c", "copy",
-                "-map", "0:v:0", "-map", "1:a:0?", "-map", "0:a:0?", "-map", "1:v:0?", outfile, "-y" };
+                "-map", "0:v:0", "-map", "1:a:0", outfile, "-y" };
             return args;
         }
 

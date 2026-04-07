@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TraceLog;
 
 namespace XDM.Core.MediaParser.YouTube
 {
@@ -44,43 +45,38 @@ namespace XDM.Core.MediaParser.YouTube
                        .GroupBy(x => x.QualityLabel + x.MimeType)
                        .Select(g => g.OrderByDescending(a => a.ContentLength / (a.Bitrate > 0 ? a.Bitrate : 1)).First());
 
-                    if (maxOfEachQualityVideoGroupMp4 != null && maxOfEachQualityAudioMp4 != null)
+                    // Removed redundant != null checks for LINQ queries
+                    foreach (var video in maxOfEachQualityVideoGroupMp4)
                     {
-                        foreach (var video in maxOfEachQualityVideoGroupMp4)
+                        foreach (var audio in maxOfEachQualityAudioMp4)
                         {
-                            foreach (var audio in maxOfEachQualityAudioMp4)
-                            {
-                                var ext = GetMediaExtension(video.MimeType, audio.MimeType);
-                                dualVideoItems.Add(
-                                    new ParsedDualUrlVideoFormat(items.VideoDetails?.Title ?? "YouTube Video",
-                                        video.Url!,
-                                        audio.Url!,
-                                        video.QualityLabel ?? "Unknown Quality",
-                                        ext,
-                                        video.ContentLength + audio.ContentLength
-                                    )
-                                );
-                            }
+                            var ext = GetMediaExtension(video.MimeType, audio.MimeType);
+                            dualVideoItems.Add(
+                                new ParsedDualUrlVideoFormat(items.VideoDetails?.Title ?? "YouTube Video",
+                                    video.Url!,
+                                    audio.Url!,
+                                    video.QualityLabel ?? "Unknown Quality",
+                                    ext,
+                                    video.ContentLength + audio.ContentLength
+                                )
+                            );
                         }
                     }
 
-                    if (maxOfEachQualityVideoGroupWebm != null && maxOfEachQualityAudioWebm != null)
+                    foreach (var video in maxOfEachQualityVideoGroupWebm)
                     {
-                        foreach (var video in maxOfEachQualityVideoGroupWebm)
+                        foreach (var audio in maxOfEachQualityAudioWebm)
                         {
-                            foreach (var audio in maxOfEachQualityAudioWebm)
-                            {
-                                var ext = GetMediaExtension(video.MimeType, audio.MimeType);
-                                dualVideoItems.Add(
-                                    new ParsedDualUrlVideoFormat(items.VideoDetails?.Title ?? "YouTube Video",
-                                        video.Url!,
-                                        audio.Url!,
-                                        video.QualityLabel ?? "Unknown Quality",
-                                        ext,
-                                        video.ContentLength + audio.ContentLength
-                                    )
-                                );
-                            }
+                            var ext = GetMediaExtension(video.MimeType, audio.MimeType);
+                            dualVideoItems.Add(
+                                new ParsedDualUrlVideoFormat(items.VideoDetails?.Title ?? "YouTube Video",
+                                    video.Url!,
+                                    audio.Url!,
+                                    video.QualityLabel ?? "Unknown Quality",
+                                    ext,
+                                    video.ContentLength + audio.ContentLength
+                                )
+                            );
                         }
                     }
                 }

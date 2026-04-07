@@ -176,6 +176,10 @@ namespace XDM.Core.UI
                         fileToInstall = extracted[0];
                         targetName = "ffmpeg.exe";
                     }
+                    else
+                    {
+                        throw new FileNotFoundException("ffmpeg.exe not found in the extracted zip archive.");
+                    }
                 }
                 else if (assetName.EndsWith(".tar.xz", StringComparison.OrdinalIgnoreCase))
                 {
@@ -190,6 +194,10 @@ namespace XDM.Core.UI
                     using (var process = Process.Start(psi))
                     {
                         process?.WaitForExit();
+                        if (process != null && process.ExitCode != 0)
+                        {
+                            throw new Exception($"tar process exited with code {process.ExitCode}");
+                        }
                     }
 
                     var extracted = Directory.GetFiles(extractDir, "ffmpeg", SearchOption.AllDirectories);
@@ -197,6 +205,10 @@ namespace XDM.Core.UI
                     {
                         fileToInstall = extracted[0];
                         targetName = "ffmpeg";
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException("ffmpeg binary not found in the extracted tar.xz archive.");
                     }
                 }
 
@@ -210,6 +222,12 @@ namespace XDM.Core.UI
                 }
                 
                 File.Move(fileToInstall, targetPath);
+
+                // Clean up the backup file on success
+                if (File.Exists(backupPath))
+                {
+                    try { File.Delete(backupPath); } catch { }
+                }
 
 #if NET5_0_OR_GREATER
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
